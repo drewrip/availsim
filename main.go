@@ -1,10 +1,12 @@
 package main
 
 import(
-	"fmt"
+	//"fmt"
+	"time"
 	"github.com/drewrip/availsim/raft"
 )
 
 func main(){
-	fmt.Printf("%v\n", raft.NewRaft())
+	raft.NewCluster(3)
+	time.Sleep(10 * time.Second)
 }
