@@ -52,6 +52,7 @@ func main(){
 	}
 	for x:=0; x<trials; x++{
 		ind:=0
+		temptimes:=make([]int64, 0)
 		for i:=3; i<53; i+=2{
 			color.Yellow("[TEST] Starting for n=%d\n", i)
 			leaderChange := make(chan raft.ElectionTimePair, 2048)
@@ -77,15 +78,20 @@ func main(){
 			color.Red("Took: %dms\n", el)
 
 			// Process Results
-			if sqlServerAddr != ""{
-				_, err := db.Query(fmt.Sprintf("UPDATE %s SET time = time + %d, trials = trials + 1 WHERE size = %d", tablename, totalEl, i))
-				check(err)
-				color.Cyan("WROTE RESULTS TO DATABASE")
-			}
+			temptimes = append(temptimes, totalEl)
 			data[ind].TotalTime += totalEl
 			data[ind].Trials++
 			ind++
 			time.Sleep(500 * time.Millisecond)
+		}
+
+		// Pushing results to db if necessary after a full run of each size
+		if sqlServerAddr != ""{
+			for i:=0; i<len(data); i++{
+				_, err := db.Query(fmt.Sprintf("UPDATE %s SET time = time + %d, trials = trials + 1 WHERE size = %d", tablename, temptimes[i], data[i].Size))
+				check(err)
+				color.Cyan("WROTE RESULTS TO DATABASE")
+			}
 		}
 	}
 
