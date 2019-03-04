@@ -88,9 +88,10 @@ func main(){
 		// Pushing results to db if necessary after a full run of each size
 		if sqlServerAddr != ""{
 			for i:=0; i<len(data); i++{
-				_, err := db.Query(fmt.Sprintf("UPDATE %s SET time = time + %d, trials = trials + 1 WHERE size = %d", tablename, temptimes[i], data[i].Size))
+				insert, err := db.Query(fmt.Sprintf("UPDATE %s SET time = time + %d, trials = trials + 1 WHERE size = %d", tablename, temptimes[i], data[i].Size))
 				check(err)
 				color.Cyan("WROTE RESULTS TO DATABASE")
+				insert.Close()
 			}
 		}
 	}
